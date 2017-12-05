@@ -3,11 +3,12 @@
 function date_fix {
 	key_input=""
 	last_disp_job=""
-	date_format="%Y-%m-%d %H:%m"
+	date_format="%Y:%m:%d %H:%m"
 	current_date=$(date "+$date_format")
-	for filename in $1/*.jpg; do
+	echo "$current_date"
+	for filename in "$1/"*.jpg; do
 		echo $filename
-		magick display -resize 600 $filename &
+		magick display -resize 600 "$filename" &
 		last_disp_job=$!
 		while :
 		do
@@ -22,13 +23,14 @@ function date_fix {
 					echo $current_date
 					;;
 				g)
-					echo done
+					exiftool -AllDates="$current_date" "$filename"
 					kill $last_disp_job
 					break
 					;;
 			esac
 		done
 	done
+	rm -rf "$1/"*_original
 }
 
-date_fix $1
+date_fix "$1"
