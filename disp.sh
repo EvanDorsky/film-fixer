@@ -2,11 +2,13 @@
 
 function date_fix {
 	key_input=""
+	last_disp_job=""
 	date_format="%Y-%m-%d %H:%m"
-	date_format_date="%Y-%m-%d"
 	current_date=$(date "+$date_format")
 	for filename in $1/*.jpg; do
 		echo $filename
+		magick display -resize 600 $filename &
+		last_disp_job=$!
 		while :
 		do
 			read -rsn1 key_input
@@ -21,12 +23,11 @@ function date_fix {
 					;;
 				g)
 					echo done
+					kill $last_disp_job
 					break
 					;;
 			esac
 		done
-				
-		magick display -resize 400 $filename
 	done
 }
 
