@@ -15,11 +15,19 @@ function date_fix {
 			read -rsn1 key_input
 			case $key_input in
 				j)
-					current_date=$(date -jv -1d -f "$date_format" "$current_date" "+$date_format")
+					current_date=$(date -jv +1d -f "$date_format" "$current_date" "+$date_format")
 					echo $current_date
 					;;
 				k)
-					current_date=$(date -jv +1d -f "$date_format" "$current_date" "+$date_format")
+					current_date=$(date -jv -1d -f "$date_format" "$current_date" "+$date_format")
+					echo $current_date
+					;;
+				i)
+					current_date=$(date -jv -1M -f "$date_format" "$current_date" "+$date_format")
+					echo $current_date
+					;;
+				o)
+					current_date=$(date -jv +1M -f "$date_format" "$current_date" "+$date_format")
 					echo $current_date
 					;;
 				g)
