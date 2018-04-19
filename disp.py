@@ -3,7 +3,9 @@ import sys, os
 import tty, termios
 import subprocess
 from multiprocessing import Process
+import threading
 import arrow
+import time
 
 date_format="YYYY:MM:DD HH:mm:ss"
 
@@ -49,6 +51,7 @@ def date_fix(path):
             disp_worker = display_process(img_path)
 
             while True:
+                time.sleep(0.1)
                 current_time = current_time.replace(minutes=+1) # increment by a minute each time
                 print current_time.format(date_format)
                 key_input = getch()
@@ -64,9 +67,9 @@ def date_fix(path):
                     current_time = current_time.replace(hours=-1)
 
                 elif key_input == "n":
-                    current_time = current_time.replace(minutes=+1)
+                    current_time = current_time.replace(minutes=+0)
                 elif key_input == "m":
-                    current_time = current_time.replace(minutes=-1)
+                    current_time = current_time.replace(minutes=-2)
 
                 elif key_input == "g":
                     print "Stamping %s with date: %s" % (img_path, current_time.format(date_format))
@@ -74,9 +77,24 @@ def date_fix(path):
                     disp_worker.terminate()
                     break
 
-    subprocess.Popen(["rm", "-rf", os.path.join(path, "*_original")])
+    subprocess.Popen(["rm", os.path.join(path, "*_original")])
+
+def keyboard_listen():
+    while True:
+        try:
+            pass
+        except KeyboardInterrupt:
+            exit(0)
 
 if __name__ == '__main__':
     path = sys.argv[1]
-    date_fix(path)
+    date_fixer = threading.Thread(target=date_fix, args=(path,))
+    date_fixer.daemon = True
+    date_fixer.start()
+
+    keyboard_listener = threading.Thread(target=keyboard_listen)
+    keyboard_listener.daemon = True
+    keyboard_listener.start()
+    while True:
+        time.sleep(1)
     # reverse_order(path)
