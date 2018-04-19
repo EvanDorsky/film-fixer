@@ -23,45 +23,60 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
+def reverse_order(path):
+    for _, dirname, filenames in os.walk(path):
+        filenames = [f for f in filenames if ".jpg" in f]
+        i = len(filenames)
+        j = 0
+        for filename in sorted(filenames):
+            new_filename = "01-00000%02d.jpg" % (i-j)
+            os.rename(os.path.join(path, filename), os.path.join(path, new_filename))
+
+            j+=1
+
 def date_fix(path):
     key_input = ""
 
     current_time = arrow.now()
 
     for _, dirname, filenames in os.walk(path):
+        filenames = [f for f in filenames if ".jpg" in f]
         for filename in sorted(filenames):
-            if ".jpg" in filename:
-                img_path = os.path.join(path, filename)
+            img_path = os.path.join(path, filename)
 
-                disp_worker = display_process(img_path)
+            print img_path
 
-                while True:
-                    current_time.replace(minutes=+1) # increment by a minute each time
-                    key_input = getch()
+            disp_worker = display_process(img_path)
 
-                    if key_input == "j":
-                        current_time = current_time.replace(days=+1)
-                    elif key_input == "k":
-                        current_time = current_time.replace(days=-1)
+            while True:
+                current_time = current_time.replace(minutes=+1) # increment by a minute each time
+                print current_time.format(date_format)
+                key_input = getch()
 
-                    elif key_input == "i":
-                        current_time = current_time.replace(hours=+1)
-                    elif key_input == "o":
-                        current_time = current_time.replace(hours=-1)
+                if key_input == "j":
+                    current_time = current_time.replace(days=+1)
+                elif key_input == "k":
+                    current_time = current_time.replace(days=-1)
 
-                    elif key_input == "n":
-                        current_time = current_time.replace(minutes=+1)
-                    elif key_input == "m":
-                        current_time = current_time.replace(minutes=-1)
+                elif key_input == "i":
+                    current_time = current_time.replace(hours=+1)
+                elif key_input == "o":
+                    current_time = current_time.replace(hours=-1)
 
-                    elif key_input == "g":
-                        print "Stamping %s with date: %s" % (img_path, current_time.format(date_format))
-                        date_image_process(img_path, current_time)
-                        disp_worker.terminate()
-                        break
+                elif key_input == "n":
+                    current_time = current_time.replace(minutes=+1)
+                elif key_input == "m":
+                    current_time = current_time.replace(minutes=-1)
 
-    subprocess.call(["rm", "-rf", os.path.join(path, "*_original")])
+                elif key_input == "g":
+                    print "Stamping %s with date: %s" % (img_path, current_time.format(date_format))
+                    date_image_process(img_path, current_time)
+                    disp_worker.terminate()
+                    break
+
+    subprocess.Popen(["rm", "-rf", os.path.join(path, "*_original")])
 
 if __name__ == '__main__':
     path = sys.argv[1]
     date_fix(path)
+    # reverse_order(path)
